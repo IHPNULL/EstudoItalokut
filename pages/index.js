@@ -4,8 +4,9 @@ import Box from '../src/components/Box'
 import { AlurakutMenu, AlurakutProfileSidebarMenuDefault, OrkutNostalgicIconSet } from '../src/lib/AlurakutCommons';
 import { ProfileRelationsBoxWrapper } from '../src/components/ProfileRelations';
 
+const MAXITENSPERBOX = 6;
+
 function ProfileSidebar(propriedades) {
-  console.log(propriedades);
   return (
     <Box as="aside">
       <img src={`https://github.com/${propriedades.githubUser}.png`} style={{ borderRadius: '8px' }} />
@@ -19,13 +20,15 @@ function ProfileSidebar(propriedades) {
 }
 
 function ComunidadesContainer(propriedades) {
+  const comunidadesMostradas = propriedades.comunidades.slice(0, MAXITENSPERBOX);
+
   return (
     <ProfileRelationsBoxWrapper>
       <h2 className="smallTitle">
         comunidades ({propriedades.comunidades.length})
       </h2>
       <ul>
-        {propriedades.comunidades.map((itemAtual) => {
+        {comunidadesMostradas.map((itemAtual) => {
           return (
             <li key={itemAtual.id}>
               <a href={`/users/${itemAtual.title}`}>
@@ -41,13 +44,14 @@ function ComunidadesContainer(propriedades) {
 }
 
 function PessoasContainer(propriedades) {
+  const pessoasMostradas = propriedades.pessoasFavoritas.slice(0, MAXITENSPERBOX);
   return (
     <ProfileRelationsBoxWrapper>
       <h2 className="smallTitle">
         Pessoas da comunidade ({propriedades.pessoasFavoritas.length})
       </h2>
       <ul>
-        {propriedades.pessoasFavoritas.map((itemAtual) => {
+        {pessoasMostradas.map((itemAtual) => {
           return (
             <li key={itemAtual}>
               <a href={`/users/${itemAtual}`}>
@@ -65,7 +69,7 @@ function PessoasContainer(propriedades) {
 export default function Home() {
   const usuarioAleatorio = 'IHPNULL';
   const [comunidades, setComunidades] = React.useState([{
-    id: new Date().toISOString,
+    id: '949580928340280348258',
     title: 'Eu odeio acordar cedo',
     image: 'http://placehold.it/300x300',
   }]);
