@@ -103,9 +103,6 @@ export default function Home() {
                 e.preventDefault();
                 const formData = new FormData(e.target);
 
-                console.log('title: ' + formData.get('title'));
-                console.log('image: ' + formData.get('image'));
-
                 const comunidade = {
                   id: new Date().toISOString,
                   title: formData.get('title'),
