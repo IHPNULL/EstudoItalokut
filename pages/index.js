@@ -21,7 +21,6 @@ function ProfileSidebar(propriedades) {
 
 function ComunidadesContainer(propriedades) {
   const comunidadesMostradas = propriedades.comunidades.slice(0, MAXITENSPERBOX);
-
   return (
     <ProfileRelationsBoxWrapper>
       <h2 className="smallTitle">
@@ -32,7 +31,7 @@ function ComunidadesContainer(propriedades) {
           return (
             <li key={itemAtual.id}>
               <a href={`/users/${itemAtual.title}`}>
-                <img src={'http://placehold.it/300x300'} />
+                <img src={itemAtual.image} />
                 <span>{itemAtual.title}</span>
               </a>
             </li>
@@ -43,20 +42,20 @@ function ComunidadesContainer(propriedades) {
   )
 }
 
-function PessoasContainer(propriedades) {
-  const pessoasMostradas = propriedades.pessoasFavoritas.slice(0, MAXITENSPERBOX);
+function BasicBoxContainer(propriedades) {
+  const itensMostrados = propriedades.array.slice(0, MAXITENSPERBOX);
   return (
     <ProfileRelationsBoxWrapper>
       <h2 className="smallTitle">
-        Pessoas da comunidade ({propriedades.pessoasFavoritas.length})
+      {propriedades.title} ({propriedades.array.length})
       </h2>
       <ul>
-        {pessoasMostradas.map((itemAtual) => {
+        {itensMostrados.map((itemAtual) => {
           return (
-            <li key={itemAtual}>
-              <a href={`/users/${itemAtual}`}>
-                <img src={`https://github.com/${itemAtual}.png`} />
-                <span>{itemAtual}</span>
+            <li key={itemAtual.id}>
+              <a href={`/users/${itemAtual.login}`}>
+                <img src={`https://github.com/${itemAtual.login}.png`} />
+                <span>{itemAtual.login}</span>
               </a>
             </li>
           )
@@ -68,18 +67,38 @@ function PessoasContainer(propriedades) {
 
 export default function Home() {
   const usuarioAleatorio = 'IHPNULL';
-  const [comunidades, setComunidades] = React.useState([{
-    id: '949580928340280348258',
-    title: 'Eu odeio acordar cedo',
-    image: 'http://placehold.it/300x300',
-  }]);
-  const pessoasFavoritas = [
-    'IHPNULL',
-    'luizosb',
-    'Gukiub',
-    'EdsonYamamoto'
-  ]
-
+  const [comunidades, setComunidades] = React.useState([]);
+  const [seguimores, setSeguimores] = React.useState([]);
+  
+  React.useEffect(function () {
+    fetch(`https://api.github.com/users/IHPNULL/followers`)
+      .then((resposta) => resposta.json())
+      .then((respostona) => setSeguimores(respostona));
+    fetch(`https://graphql.datocms.com/`, {
+      method: `POST`,
+      headers: {
+        'Authorization': '1d25bbeb93e77d002b92e0af0332d8',
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: JSON.stringify({
+        "query": `query {
+            allCommunities {
+              id
+              title
+              image
+              communitySlug
+              _status
+              _firstPublishedAt
+            }
+          }`
+      })
+    }).then((resposta) => resposta.json())
+      .then(function (respostona) {
+        return setComunidades(respostona.data.allCommunities);
+      });
+  }, []);
+  
   return (
     <>
       <AlurakutMenu githubUser='IHPNULL' />
@@ -103,17 +122,23 @@ export default function Home() {
                 e.preventDefault();
                 const formData = new FormData(e.target);
 
-                console.log('title: ' + formData.get('title'));
-                console.log('image: ' + formData.get('image'));
-
                 const comunidade = {
                   id: new Date().toISOString,
                   title: formData.get('title'),
                   image: formData.get('image'),
+                  communitySlug: "italo haas",
                 }
 
-                const comunidadesUpdated = [...comunidades, comunidade];
-                setComunidades(comunidadesUpdated);
+                fetch(`/api/comunidades`, {
+                  method: `POST`,
+                  headers: {
+                    'Content-Type': 'application/json',
+                  },
+                  body: JSON.stringify(comunidade)
+                }).then(async function () {
+                  const comunidadesUpdated = [...comunidades, comunidade];
+                  setComunidades(comunidadesUpdated);  
+                })
               }}>
                 <input
                   type='text'
@@ -135,8 +160,9 @@ export default function Home() {
           </Box>
         </div>
         <div className="profileRelationsArea" style={{ gridArea: 'profileRelationsArea' }}>
+          <BasicBoxContainer title='Seguimores' array={seguimores} />
           <ComunidadesContainer comunidades={comunidades} />
-          <PessoasContainer pessoasFavoritas={pessoasFavoritas} />
+          <BasicBoxContainer title='Pessoas da comunidade' array={seguimores} />
         </div>
       </MainGrid>
     </>
