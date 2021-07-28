@@ -3,7 +3,6 @@ import styled from 'styled-components';
 const Box = styled.div`
   background: #FFFFFF;
   border-radius: 8px;
-
   padding: 16px;
 
   /* CSS Pré-Pronto */
@@ -57,6 +56,10 @@ const Box = styled.div`
     border-radius: 10000px;
     background-color: #6F92BB;
   }
-`; 
+
+  @media(max-width: 270px) {
+    min-width: 265px;
+  }
+  `;
 
 export default Box
