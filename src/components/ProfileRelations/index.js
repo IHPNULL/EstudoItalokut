@@ -49,4 +49,7 @@ export const ProfileRelationsBoxWrapper = styled(Box)`
       background-image: linear-gradient(0deg,#00000073,transparent);
     }
   }
+  @media(max-width: 270px) {
+    min-width: 265px;
+  }
 `;

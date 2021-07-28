@@ -31,7 +31,7 @@ function ComunidadesContainer(propriedades) {
           return (
             <li key={itemAtual.id}>
               <a href={`/users/${itemAtual.title}`}>
-                <img src={'http://placehold.it/300x300'} />
+                <img src={itemAtual.image} />
                 <span>{itemAtual.title}</span>
               </a>
             </li>
@@ -67,22 +67,37 @@ function BasicBoxContainer(propriedades) {
 
 export default function Home() {
   const usuarioAleatorio = 'IHPNULL';
-  const [comunidades, setComunidades] = React.useState([{
-    id: '949580928340280348258',
-    title: 'Eu odeio acordar cedo',
-    image: 'http://placehold.it/300x300',
-  }]);
+  const [comunidades, setComunidades] = React.useState([]);
   const [seguimores, setSeguimores] = React.useState([]);
   
-  React.useEffect( function () {
+  React.useEffect(function () {
     fetch(`https://api.github.com/users/IHPNULL/followers`)
-    .then(function (resposta) {
-      return resposta.json()
-    })
-    .then(function (respostona) {
-      return setSeguimores(respostona);
-    })
-  },[])
+      .then((resposta) => resposta.json())
+      .then((respostona) => setSeguimores(respostona));
+    fetch(`https://graphql.datocms.com/`, {
+      method: `POST`,
+      headers: {
+        'Authorization': '1d25bbeb93e77d002b92e0af0332d8',
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: JSON.stringify({
+        "query": `query {
+            allCommunities {
+              id
+              title
+              image
+              communitySlug
+              _status
+              _firstPublishedAt
+            }
+          }`
+      })
+    }).then((resposta) => resposta.json())
+      .then(function (respostona) {
+        return setComunidades(respostona.data.allCommunities);
+      });
+  }, []);
   
   return (
     <>
@@ -111,10 +126,19 @@ export default function Home() {
                   id: new Date().toISOString,
                   title: formData.get('title'),
                   image: formData.get('image'),
+                  communitySlug: "italo haas",
                 }
 
-                const comunidadesUpdated = [...comunidades, comunidade];
-                setComunidades(comunidadesUpdated);
+                fetch(`/api/comunidades`, {
+                  method: `POST`,
+                  headers: {
+                    'Content-Type': 'application/json',
+                  },
+                  body: JSON.stringify(comunidade)
+                }).then(async function () {
+                  const comunidadesUpdated = [...comunidades, comunidade];
+                  setComunidades(comunidadesUpdated);  
+                })
               }}>
                 <input
                   type='text'
