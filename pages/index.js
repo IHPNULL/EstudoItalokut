@@ -21,7 +21,6 @@ function ProfileSidebar(propriedades) {
 
 function ComunidadesContainer(propriedades) {
   const comunidadesMostradas = propriedades.comunidades.slice(0, MAXITENSPERBOX);
-
   return (
     <ProfileRelationsBoxWrapper>
       <h2 className="smallTitle">
@@ -43,20 +42,20 @@ function ComunidadesContainer(propriedades) {
   )
 }
 
-function PessoasContainer(propriedades) {
-  const pessoasMostradas = propriedades.pessoasFavoritas.slice(0, MAXITENSPERBOX);
+function BasicBoxContainer(propriedades) {
+  const itensMostrados = propriedades.array.slice(0, MAXITENSPERBOX);
   return (
     <ProfileRelationsBoxWrapper>
       <h2 className="smallTitle">
-        Pessoas da comunidade ({propriedades.pessoasFavoritas.length})
+      {propriedades.title} ({propriedades.array.length})
       </h2>
       <ul>
-        {pessoasMostradas.map((itemAtual) => {
+        {itensMostrados.map((itemAtual) => {
           return (
-            <li key={itemAtual}>
-              <a href={`/users/${itemAtual}`}>
-                <img src={`https://github.com/${itemAtual}.png`} />
-                <span>{itemAtual}</span>
+            <li key={itemAtual.id}>
+              <a href={`/users/${itemAtual.login}`}>
+                <img src={`https://github.com/${itemAtual.login}.png`} />
+                <span>{itemAtual.login}</span>
               </a>
             </li>
           )
@@ -73,13 +72,18 @@ export default function Home() {
     title: 'Eu odeio acordar cedo',
     image: 'http://placehold.it/300x300',
   }]);
-  const pessoasFavoritas = [
-    'IHPNULL',
-    'luizosb',
-    'Gukiub',
-    'EdsonYamamoto'
-  ]
-
+  const [seguimores, setSeguimores] = React.useState([]);
+  
+  React.useEffect( function () {
+    fetch(`https://api.github.com/users/IHPNULL/followers`)
+    .then(function (resposta) {
+      return resposta.json()
+    })
+    .then(function (respostona) {
+      return setSeguimores(respostona);
+    })
+  },[])
+  
   return (
     <>
       <AlurakutMenu githubUser='IHPNULL' />
@@ -132,8 +136,9 @@ export default function Home() {
           </Box>
         </div>
         <div className="profileRelationsArea" style={{ gridArea: 'profileRelationsArea' }}>
+          <BasicBoxContainer title='Seguimores' array={seguimores} />
           <ComunidadesContainer comunidades={comunidades} />
-          <PessoasContainer pessoasFavoritas={pessoasFavoritas} />
+          <BasicBoxContainer title='Pessoas da comunidade' array={seguimores} />
         </div>
       </MainGrid>
     </>
